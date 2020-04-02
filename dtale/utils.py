@@ -596,8 +596,7 @@ def make_list(vals):
         return []
     elif isinstance(vals, (list, tuple)):
         return vals
-    else:
-        return [vals]
+    return [vals]
 
 
 def dict_merge(d1, d2, *args):

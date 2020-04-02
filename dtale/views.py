@@ -628,7 +628,12 @@ def view_popup(popup_type, data_id=None):
     title = 'D-Tale'
     if curr_metadata.get('name'):
         title = '{} ({})'.format(title, curr_metadata['name'])
-    popup_title = ' '.join([pt.capitalize() for pt in popup_type.split('-')])
+    if popup_type == 'reshape':
+        popup_title = 'Summarize Data'
+    elif popup_type == 'filter':
+        popup_title = 'Custom Filter'
+    else:
+        popup_title = ' '.join([pt.capitalize() for pt in popup_type.split('-')])
     title = '{} - {}'.format(title, popup_title)
     params = request.args.to_dict()
     if len(params):
