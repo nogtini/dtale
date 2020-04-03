@@ -167,7 +167,8 @@ def test_map_data(unittest):
                     {'id': 'map-lon-dropdown', 'property': 'value', 'value': None},
                     {'id': 'map-val-dropdown', 'property': 'value', 'value': None},
                     {'id': 'map-scope-dropdown', 'property': 'value', 'value': 'world'},
-                    {'id': 'map-proj-dropdown', 'property': 'value', 'value': None}
+                    {'id': 'map-proj-dropdown', 'property': 'value', 'value': None},
+                    {'id': 'map-group-dropdown', 'property': 'value', 'value': None},
                 ],
                 'state': [
                     pathname
@@ -192,6 +193,7 @@ def test_map_data(unittest):
             unittest.assertEqual(resp_data['map-lat-input']['style'], {})
 
             params['inputs'][0]['value'] = 'choropleth'
+            params['inputs'][-1]['value'] = 'foo'
             response = c.post('/charts/_dash-update-component', json=params)
             resp_data = response.get_json()['response']
             unittest.assertEqual(resp_data['map-loc-mode-input']['style'], {})
@@ -212,7 +214,9 @@ def test_group_values(unittest):
                 'output': '..group-val-dropdown.options...group-val-dropdown.value..',
                 'changedPropIds': ['group-dropdown.value'],
                 'inputs': [
-                    {'id': 'group-dropdown', 'property': 'value', 'value': None}
+                    {'id': 'chart-tabs', 'property': 'value', 'value': None},
+                    {'id': 'group-dropdown', 'property': 'value', 'value': None},
+                    {'id': 'map-group-dropdown', 'property': 'value', 'value': None}
                 ],
                 'state': [
                     pathname,
@@ -225,7 +229,8 @@ def test_group_values(unittest):
                 response.get_json()['response'],
                 {'group-val-dropdown': {'options': [], 'value': None}}
             )
-            params['inputs'][0]['value'] = ['c']
+            params['inputs'][0]['value'] = 'line'
+            params['inputs'][1]['value'] = ['c']
             params['state'][1]['value'] = dict(chart_type='line')
 
             response = c.post('/charts/_dash-update-component', json=params)
@@ -253,9 +258,11 @@ def test_main_input_styling(unittest):
         params = {
             'output': '..group-val-input.style...main-inputs.className..',
             'changedPropIds': ['input-data.modified_timestamp'],
-            'inputs': [ts_builder('input-data')],
+            'inputs': [ts_builder('input-data'), ts_builder('map-input-data')],
             'state': [
-                {'id': 'input-data', 'property': 'data', 'value': {'chart_type': 'maps'}}]
+                {'id': 'input-data', 'property': 'data', 'value': {'chart_type': 'maps'}},
+                {'id': 'map-input-data', 'property': 'data', 'value': {}},
+            ]
         }
         response = c.post('/charts/_dash-update-component', json=params)
         unittest.assertEqual(
@@ -276,7 +283,8 @@ def test_chart_type_changes(unittest):
     with app.test_client() as c:
         fig_data_outputs = (
             '..y-multi-input.style...y-single-input.style...z-input.style...group-input.style...rolling-inputs.style...'
-            'cpg-input.style...barmode-input.style...barsort-input.style...yaxis-input.style...animate-input.style..'
+            'cpg-input.style...barmode-input.style...barsort-input.style...yaxis-input.style...animate-input.style...'
+            'animate-by-input.style..'
         )
         inputs = {'id': 'input-data', 'property': 'data', 'value': {
             'chart_type': 'line', 'x': 'a', 'y': ['b'], 'z': None, 'group': None, 'agg': None,
@@ -444,13 +452,14 @@ def test_chart_input_updates(unittest):
                 {'id': 'barsort-dropdown', 'property': 'value'},
                 {'id': 'colorscale-dropdown', 'property': 'value'},
                 {'id': 'animate-toggle', 'property': 'on'},
+                {'id': 'animate-by-dropdown', 'property': 'value'}
             ],
         }
 
         response = c.post('/charts/_dash-update-component', json=params)
         resp_data = response.get_json()
         unittest.assertEqual(resp_data['response']['props']['data'], {
-            'animate': None, 'cpg': False, 'barmode': 'group', 'barsort': None, 'colorscale': None,
+            'animate': None, 'cpg': False, 'barmode': 'group', 'barsort': None, 'colorscale': None, 'animate_by': None
         })
 
 

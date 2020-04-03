@@ -1285,7 +1285,6 @@ def get_correlations(data_id):
         )
         valid_corr_cols = []
         valid_date_cols = []
-        rolling = False
         for col_info in global_state.get_dtypes(data_id):
             name, dtype = map(col_info.get, ['name', 'dtype'])
             dtype = classify_type(dtype)
@@ -1295,11 +1294,11 @@ def get_correlations(data_id):
                 # even if a datetime column exists, we need to make sure that there is enough data for a date
                 # to warrant a correlation, https://github.com/man-group/dtale/issues/43
                 date_counts = data[name].dropna().value_counts()
+                print(date_counts.head())
                 if len(date_counts[date_counts > 1]) > 1:
-                    valid_date_cols.append(name)
+                    valid_date_cols.append(dict(name=name, rolling=False))
                 elif date_counts.eq(1).all():
-                    valid_date_cols.append(name)
-                    rolling = True
+                    valid_date_cols.append(dict(name=name, rolling=True))
 
         if data[valid_corr_cols].isnull().values.any():
             data = data.corr(method='pearson')
@@ -1325,7 +1324,7 @@ def get_correlations(data_id):
         data = data.reset_index()
         col_types = grid_columns(data)
         f = grid_formatter(col_types, nan_display=None)
-        return jsonify(data=f.format_dicts(data.itertuples()), dates=valid_date_cols, rolling=rolling, code=code)
+        return jsonify(data=f.format_dicts(data.itertuples()), dates=valid_date_cols, code=code)
     except BaseException as e:
         return jsonify_error(e)
 
